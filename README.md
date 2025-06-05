@@ -136,7 +136,7 @@ The dictionary has two top-level keys: **`"train"`** and **`"test"`**, each mapp
 - **`denom_sb`**  
   The denominator used in the noise-corrected correlation (the full "Statistical Noise Ceiling"):  
   ```math
-  \text{denom\_sb} = \sqrt{\left(\text{r\_xx\_sb}\right) \cdot \left(\text{r\_yy\_sb}\right)}
+  \text{denom_sb} = \sqrt{\left(\text{r_xx_sb}\right) \cdot \left(\text{r_yy_sb}\right)}
   ```
   If this value is undefined (e.g., negative or zero), **`r_xy_n_sb`** is set to NaN.
 
