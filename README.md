@@ -1,5 +1,6 @@
 # brainmodel_utils
 Basic utilities for comparing models to neural & behavioral data, along with packaging these data in Python (from Matlab).
+Used in our [NeuroAI Turing Test](https://arxiv.org/abs/2502.16238).
 
 # Installation
 To install run:
@@ -134,9 +135,9 @@ The dictionary has two top-level keys: **`"train"`** and **`"test"`**, each mapp
   Raw correlation between predicted and actual responses (uncorrected for noise).
 
 - **`denom_sb`**  
-  The denominator used in the noise-corrected correlation (the full "Statistical Noise Ceiling"):  
+  The denominator used in the noise-corrected correlation (the full "Statistical Noise Ceiling"):
   ```math
-  \text{denom_sb} = \sqrt{\left(\text{r_xx_sb}\right) \cdot \left(\text{r_yy_sb}\right)}
+  \text{denom\_sb} = \sqrt{\left(\text{r\_xx\_sb}\right) \cdot \left(\text{r\_yy\_sb}\right)}
   ```
   If this value is undefined (e.g., negative or zero), **`r_xy_n_sb`** is set to NaN.
 
