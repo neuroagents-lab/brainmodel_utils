@@ -11,10 +11,6 @@ def map_from_str(map_type):
         from brainmodel_utils.neural_mappers import PercentileNeuralMap
 
         return PercentileNeuralMap
-    elif map_type.lower() == "factored":
-        from brainmodel_utils.neural_mappers import FactoredNeuralMap
-
-        return FactoredNeuralMap
     elif map_type.lower() == "identity":
         from brainmodel_utils.neural_mappers import IdentityNeuralMap
 

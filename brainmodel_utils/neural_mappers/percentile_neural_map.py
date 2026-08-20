@@ -1,13 +1,5 @@
 import numpy as np
 import sklearn.linear_model as lm
-import torch
-import time
-
-cuda_avail = 0
-use_gpu = 0
-if torch.cuda.is_available() and use_gpu:
-    cuda_avail = 1
-    device = torch.device("cuda:0")
 
 from . import neural_map_base as nm
 
@@ -46,8 +38,6 @@ class PercentileNeuralMap(nm.NeuralMapBase):
         self._weights_save_nm = weights_save_nm
         self._weights = None
 
-        self._random_source = True  # if true, pick random source neurons
-
     def _gather_correlations(self, X, Y):
         """
         Subroutine to gather Pearson correlations between source and targets.
@@ -69,26 +59,8 @@ class PercentileNeuralMap(nm.NeuralMapBase):
         X_ = X_ / np.linalg.norm(X_, axis=0)
         Y_ = Y_ / np.linalg.norm(Y_, axis=0)
 
-        # if GPU is availible, use it
-        if cuda_avail:
-            # Convert numpy arrays to PyTorch tensors on GPU
-            X_torch = torch.tensor(X_.values, device=device, dtype=torch.float16)
-            Y_torch = torch.tensor(Y_.values, device=device, dtype=torch.float16)
-
-            # # First, remove column means
-            # X_torch_ = X_torch - X_torch.mean(dim=0)
-            # Y_torch_ = Y_torch - Y_torch.mean(dim=0)
-
-            # # Second, normalize each column vector to norm 1
-            # X_torch_ = X_torch_ / torch.linalg.norm(X_torch_, dim=0)
-            # Y_torch_ = Y_torch_ / torch.linalg.norm(Y_torch_, dim=0)
-
-            self._corrs = torch.mm(X_torch.T, Y_torch).detach().cpu().numpy()
-
-        else:
-            # Now compute dot product = Pearson correlation
-
-            self._corrs = np.dot(X_.T, Y_)  # (source, target)
+        # Now compute dot product = Pearson correlation
+        self._corrs = np.dot(X_.T, Y_)  # (source, target)
 
     def fit(self, X, Y):
         """
@@ -120,10 +92,9 @@ class PercentileNeuralMap(nm.NeuralMapBase):
         self._weights = list()
         self._mappers = list()
         self._num_source_units = list()
-
         for i in range(self._n_targets):
-            source_idxs = self._get_sources(i)
 
+            source_idxs = self._get_sources(i)
             assert source_idxs.shape[0] == self._n_source
             source_features = X[:, source_idxs]
             self._num_source_units.append(source_features.shape[-1])
@@ -133,19 +104,16 @@ class PercentileNeuralMap(nm.NeuralMapBase):
                 assert source_idxs.sum() >= 1 and source_idxs.ndim == 1
                 best_source_idx = np.argwhere(source_idxs == True).flatten()
                 assert best_source_idx.size >= 1
-
-                if self._random_source == False:
-                    mapper = best_source_idx[
-                        0
-                    ]  # We append the best source idx, taking the first one if there are ties
-                else:
-                    mapper = np.int64(np.random.randint(low=0, high=self._n_targets))
+                mapper = best_source_idx[
+                    0
+                ]  # We append the best source idx, taking the first one if there are ties
             else:
                 if source_features.ndim == 1:
                     source_features = source_features[:, np.newaxis]
 
                 mapper = getattr(lm, self._regression_type)(**self._regression_kwargs)
                 mapper.fit(source_features, Y[:, i][:, np.newaxis])
+
             self._mappers.append(mapper)
             if self._weights_save_nm is not None:
                 self._weights.append(mapper.coef_)
@@ -183,14 +151,13 @@ class PercentileNeuralMap(nm.NeuralMapBase):
         ), f"Number of train features ({self._n_source}) does not align with number of test features ({X.shape[1]})"
 
         n_samples = X.shape[0]
-        preds = np.empty((n_samples, self._n_targets)) + np.NaN
+        preds = np.full((n_samples, self._n_targets), np.nan)
         for i, mapper in enumerate(self._mappers):
             if self._identity:
                 assert isinstance(mapper, np.int64)  # mapper contains the source index
                 curr_pred = X[:, mapper]
             else:
                 source_idxs = self._get_sources(i)  # TODO: Cache source idxs
-
                 assert source_idxs.shape[0] == X.shape[1]
                 source_features = X[:, source_idxs]
                 assert (

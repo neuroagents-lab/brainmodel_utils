@@ -98,7 +98,8 @@ class PLSNeuralMap(nm.NeuralMapBase):
             if self._fit_per_target_unit:
                 assert isinstance(self._pls, list) is True
                 assert len(self._pls) == self._n_targets
-                preds = np.empty((n_samples, self._n_targets)) + np.NaN
+
+                preds = np.full((n_samples, self._n_targets), np.nan)
                 for i, curr_pls in enumerate(self._pls):
                     if curr_pls is not None:
                         curr_pred = curr_pls.predict(X).flatten()
@@ -110,6 +111,7 @@ class PLSNeuralMap(nm.NeuralMapBase):
             assert self._pls is None
             if self._verbose:
                 print(f"[WARNING] PLS regression fitting failed.")
-            preds = np.zeros((n_samples, self._n_targets)) + np.NaN
+
+            preds = np.full((n_samples, self._n_targets), np.nan)
 
         return preds

@@ -87,6 +87,7 @@ def str_to_metric_func(name):
         metric_func = partial(rsa, metric="pearsonr")
     elif name == "rsa_spearmanr":
         metric_func = partial(rsa, metric="spearmanr")
+    else:
         raise ValueError
     return metric_func
 
