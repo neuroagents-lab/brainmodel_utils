@@ -289,6 +289,7 @@ def get_linregress_consistency(
             source=source,
             target=target,
             map_kwargs=map_kwargs,
+            splits=splits,
             metric=metric,
             sphseed=sphseed,
             **kwargs
@@ -299,6 +300,7 @@ def get_linregress_consistency(
                 source=source,
                 target=target,
                 map_kwargs=map_kwargs,
+                splits=splits,
                 metric=metric,
                 sphseed=sphseed,
                 **kwargs
